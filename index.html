@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getallenjacht</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #10142a;
+    --bg-deep: #0a0d1e;
+    --surface: #1a2044;
+    --surface-hi: #232a54;
+    --line: #323a6e;
+    --text: #edeffb;
+    --text-dim: #9aa1cc;
+    --accent: #ffb454;
+    --accent-dim: #a97a3c;
+    --good: #5fe3b6;
+    --bad: #ff7a7a;
+    --track-lo: #ff8f6b;
+    --track-hi: #6fb4ff;
+    --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+    --font-body: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    background: var(--bg-deep);
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(255,180,84,0.08), transparent 40%),
+      radial-gradient(circle at 85% 90%, rgba(111,180,255,0.08), transparent 45%);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 20px;
+    position: relative;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+
+  .stage {
+    width: 100%;
+    max-width: 560px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .eyebrow::before { content: ""; width: 22px; height: 1px; background: var(--accent-dim); }
+
+  h1 {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-size: clamp(34px, 6vw, 48px);
+    line-height: 1.05;
+    margin: 0 0 10px;
+    text-wrap: balance;
+  }
+
+  .lede {
+    font-size: 15.5px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    max-width: 46ch;
+    margin: 0 0 32px;
+  }
+  .lede b { color: var(--text); font-weight: 600; }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 28px;
+    position: relative;
+  }
+
+  .range-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    letter-spacing: 0.04em;
+  }
+  .range-row .lo { color: var(--track-lo); }
+  .range-row .hi { color: var(--track-hi); }
+
+  .track {
+    position: relative;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--bg-deep);
+    border: 1px solid var(--line);
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+  .track-fill {
+    position: absolute;
+    top: 0; bottom: 0;
+    background: linear-gradient(90deg, var(--track-lo), var(--accent) 50%, var(--track-hi));
+    transition: left 0.35s ease, right 0.35s ease;
+  }
+  .track-marker {
+    position: absolute;
+    top: -4px;
+    width: 2px;
+    height: 18px;
+    background: var(--text);
+    box-shadow: 0 0 0 3px rgba(237,239,251,0.15);
+    transition: left 0.35s ease;
+  }
+
+  form { display: flex; gap: 10px; margin-bottom: 22px; }
+
+  input[type="number"] {
+    flex: 1;
+    background: var(--bg-deep);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 20px;
+    padding: 12px 14px;
+    min-width: 0;
+  }
+  input[type="number"]:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(255,180,84,0.18);
+  }
+
+  button {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    border: none;
+    border-radius: 3px;
+    padding: 0 22px;
+    background: var(--accent);
+    color: #241505;
+    cursor: pointer;
+    transition: transform 0.12s ease, background 0.12s ease;
+  }
+  button:hover { background: #ffc470; }
+  button:active { transform: scale(0.97); }
+  button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  button:disabled { opacity: 0.4; cursor: default; }
+
+  .feedback {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    min-height: 22px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .feedback.hoger { color: var(--track-hi); }
+  .feedback.lager { color: var(--track-lo); }
+  .feedback.win { color: var(--good); font-weight: 600; }
+  .feedback.err { color: var(--bad); }
+
+  .shake { animation: shake 0.32s ease; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+  .pop { animation: pop 0.4s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes pop {
+    0% { transform: scale(0.9); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .history { display: flex; flex-wrap: wrap; gap: 6px; min-height: 30px; }
+  .chip {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface-hi);
+    color: var(--text-dim);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .chip .arrow-up { color: var(--track-hi); }
+  .chip .arrow-down { color: var(--track-lo); }
+  .chip .arrow-eq { color: var(--good); }
+
+  .foot-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .best { color: var(--accent); }
+  .again-btn {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text-dim);
+    padding: 6px 14px;
+    font-size: 12px;
+  }
+  .again-btn:hover { color: var(--text); border-color: var(--text-dim); background: transparent; }
+
+  .source {
+    margin-top: 22px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--text-dim);
+    opacity: 0.7;
+    text-align: center;
+  }
+  .source code { color: var(--accent-dim); }
+
+  /* --- Win celebratie: confetti + ballonnen --- */
+  #confettiCanvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .balloon {
+    position: fixed;
+    bottom: -140px;
+    width: 46px;
+    height: 58px;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+  }
+  .balloon::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    width: 1px;
+    height: 40px;
+    background: rgba(237,239,251,0.35);
+    transform: translateX(-50%);
+  }
+  .balloon.rise {
+    animation: rise 3.6s ease-in forwards;
+  }
+  @keyframes rise {
+    0%   { opacity: 0; transform: translateY(0) translateX(0) rotate(0deg); }
+    8%   { opacity: 0.95; }
+    100% { opacity: 0; transform: translateY(-115vh) translateX(var(--drift, 30px)) rotate(var(--tilt, 8deg)); }
+  }
+</style>
+</head>
+<body>
+  <canvas id="confettiCanvas"></canvas>
+
+  <div class="stage">
+    <div class="eyebrow">gokspel · uit lbassie/Oefenen</div>
+    <h1>Getallenjacht</h1>
+    <p class="lede">Ik denk aan een geheim getal tussen <b>1</b> en <b>100</b>. Typ een gok en volg de balk hieronder — die laat zien welk bereik nog overblijft.</p>
+
+    <div class="panel">
+      <div class="range-row">
+        <span class="lo" id="loLabel">1</span>
+        <span>nog mogelijk</span>
+        <span class="hi" id="hiLabel">100</span>
+      </div>
+      <div class="track">
+        <div class="track-fill" id="trackFill" style="left:0%; right:0%;"></div>
+        <div class="track-marker" id="trackMarker" style="left:-10px; display:none;"></div>
+      </div>
+
+      <form id="guessForm" autocomplete="off">
+        <input type="number" id="guessInput" min="1" max="100" placeholder="jouw gok…" required>
+        <button type="submit" id="guessBtn">Gok</button>
+      </form>
+
+      <div class="feedback" id="feedback"></div>
+
+      <div class="history" id="history"></div>
+
+      <div class="foot-row">
+        <span id="attemptsLabel">0 pogingen</span>
+        <span class="best" id="bestLabel"></span>
+        <button type="button" class="again-btn" id="againBtn" hidden>Nog een keer</button>
+      </div>
+    </div>
+
+    <p class="source">Terminal-versie in de repo: <code>python gokspel.py</code></p>
+  </div>
+
+<script>
+(function () {
+  const MIN = 1, MAX = 100;
+  let secret, lo, hi, attempts, over;
+
+  const form = document.getElementById('guessForm');
+  const input = document.getElementById('guessInput');
+  const btn = document.getElementById('guessBtn');
+  const feedback = document.getElementById('feedback');
+  const history = document.getElementById('history');
+  const attemptsLabel = document.getElementById('attemptsLabel');
+  const bestLabel = document.getElementById('bestLabel');
+  const againBtn = document.getElementById('againBtn');
+  const loLabel = document.getElementById('loLabel');
+  const hiLabel = document.getElementById('hiLabel');
+  const trackFill = document.getElementById('trackFill');
+  const trackMarker = document.getElementById('trackMarker');
+
+  function pct(v) { return ((v - MIN) / (MAX - MIN)) * 100; }
+
+  function readBest() {
+    try {
+      const v = localStorage.getItem('getallenjacht-best');
+      return v ? parseInt(v, 10) : null;
+    } catch (e) { return null; }
+  }
+  function writeBest(n) {
+    try { localStorage.setItem('getallenjacht-best', String(n)); } catch (e) {}
+  }
+
+  function renderBest() {
+    const best = readBest();
+    bestLabel.textContent = best ? 'beste: ' + best + ' pogingen' : '';
+  }
+
+  function renderTrack() {
+    loLabel.textContent = lo;
+    hiLabel.textContent = hi;
+    trackFill.style.left = pct(lo) + '%';
+    trackFill.style.right = (100 - pct(hi)) + '%';
+  }
+
+  function reset() {
+    secret = Math.floor(Math.random() * (MAX - MIN + 1)) + MIN;
+    lo = MIN; hi = MAX; attempts = 0; over = false;
+    feedback.className = 'feedback';
+    feedback.textContent = 'Typ een getal om te beginnen.';
+    history.innerHTML = '';
+    attemptsLabel.textContent = '0 pogingen';
+    trackMarker.style.display = 'none';
+    againBtn.hidden = true;
+    input.disabled = false;
+    btn.disabled = false;
+    input.value = '';
+    renderTrack();
+    renderBest();
+    input.focus();
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (over) return;
+
+    const raw = input.value.trim();
+    const guess = parseInt(raw, 10);
+
+    if (!raw || Number.isNaN(guess) || guess < MIN || guess > MAX) {
+      feedback.className = 'feedback err';
+      feedback.textContent = 'Voer een getal tussen ' + MIN + ' en ' + MAX + ' in.';
+      form.classList.remove('shake'); void form.offsetWidth; form.classList.add('shake');
+      return;
+    }
+
+    attempts++;
+    attemptsLabel.textContent = attempts + (attempts === 1 ? ' poging' : ' pogingen');
+
+    trackMarker.style.display = 'block';
+    trackMarker.style.left = 'calc(' + pct(guess) + '% - 1px)';
+
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+
+    if (guess === secret) {
+      chip.innerHTML = '<span class="arrow-eq">●</span> ' + guess;
+      history.appendChild(chip);
+      feedback.className = 'feedback win pop';
+      feedback.textContent = '🎯 Geraden! Het was ' + secret + ', in ' + attempts + (attempts === 1 ? ' poging' : ' pogingen') + '.';
+      over = true;
+      input.disabled = true;
+      btn.disabled = true;
+      againBtn.hidden = false;
+
+      const best = readBest();
+      let isRecord = false;
+      if (!best || attempts < best) {
+        writeBest(attempts);
+        renderBest();
+        isRecord = true;
+        feedback.textContent += ' Nieuw record.';
+      }
+
+      celebrate(isRecord);
+    } else if (guess < secret) {
+      lo = Math.max(lo, guess + 1);
+      chip.innerHTML = '<span class="arrow-up">▲</span> ' + guess;
+      history.appendChild(chip);
+      feedback.className = 'feedback hoger pop';
+      feedback.textContent = '▲ Hoger dan ' + guess;
+      renderTrack();
+    } else {
+      hi = Math.min(hi, guess - 1);
+      chip.innerHTML = '<span class="arrow-down">▼</span> ' + guess;
+      history.appendChild(chip);
+      feedback.className = 'feedback lager pop';
+      feedback.textContent = '▼ Lager dan ' + guess;
+      renderTrack();
+    }
+
+    input.value = '';
+    if (!over) input.focus();
+  });
+
+  againBtn.addEventListener('click', reset);
+
+  reset();
+
+  /* ---------------- Win celebratie ---------------- */
+
+  const canvas = document.getElementById('confettiCanvas');
+  const ctx = canvas.getContext('2d');
+  const CONFETTI_COLORS = ['#ffb454', '#5fe3b6', '#6fb4ff', '#ff8f6b', '#edeffb'];
+  const BALLOON_COLORS = ['#ffb454', '#5fe3b6', '#6fb4ff', '#ff8f6b'];
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  function burstConfetti() {
+    const pieces = [];
+    const count = 140;
+    for (let i = 0; i < count; i++) {
+      pieces.push({
+        x: canvas.width / 2 + (Math.random() - 0.5) * 120,
+        y: canvas.height * 0.35,
+        vx: (Math.random() - 0.5) * 9,
+        vy: -Math.random() * 10 - 4,
+        size: Math.random() * 6 + 4,
+        color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+        rotation: Math.random() * Math.PI,
+        rotSpeed: (Math.random() - 0.5) * 0.3,
+        gravity: 0.28 + Math.random() * 0.08
+      });
+    }
+
+    let frame = 0;
+    const maxFrames = 130;
+
+    function step() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      frame++;
+      let alive = false;
+
+      for (const p of pieces) {
+        p.vy += p.gravity;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.rotation += p.rotSpeed;
+
+        if (p.y < canvas.height + 20) alive = true;
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotation);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+        ctx.restore();
+      }
+
+      if (alive && frame < maxFrames) {
+        requestAnimationFrame(step);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  function releaseBalloons() {
+    const count = 6;
+    for (let i = 0; i < count; i++) {
+      const b = document.createElement('div');
+      b.className = 'balloon';
+      b.style.left = (10 + Math.random() * 80) + 'vw';
+      b.style.background = BALLOON_COLORS[i % BALLOON_COLORS.length];
+      b.style.setProperty('--drift', (Math.random() * 80 - 40) + 'px');
+      b.style.setProperty('--tilt', (Math.random() * 16 - 8) + 'deg');
+      b.style.animationDelay = (Math.random() * 0.5) + 's';
+      document.body.appendChild(b);
+
+      requestAnimationFrame(() => b.classList.add('rise'));
+      b.addEventListener('animationend', () => b.remove());
+    }
+  }
+
+  function playVictoryJingle() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const ctxAudio = new AudioCtx();
+      const notes = [523.25, 659.25, 783.99, 1046.5]; // C5 E5 G5 C6
+      const now = ctxAudio.currentTime;
+
+      notes.forEach((freq, i) => {
+        const osc = ctxAudio.createOscillator();
+        const gain = ctxAudio.createGain();
+        osc.type = 'triangle';
+        osc.frequency.value = freq;
+        const start = now + i * 0.11;
+        gain.gain.setValueAtTime(0, start);
+        gain.gain.linearRampToValueAtTime(0.18, start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.32);
+        osc.connect(gain).connect(ctxAudio.destination);
+        osc.start(start);
+        osc.stop(start + 0.34);
+      });
+
+      setTimeout(() => ctxAudio.close(), 900);
+    } catch (e) {
+      /* audio niet beschikbaar (bv. autoplay-restricties) — geen probleem */
+    }
+  }
+
+  function celebrate(isRecord) {
+    if (reducedMotion) return;
+    burstConfetti();
+    releaseBalloons();
+    playVictoryJingle();
+    if (isRecord) {
+      setTimeout(burstConfetti, 350);
+    }
+  }
+})();
+</script>
+</body>
+</html>

@@ -9,9 +9,14 @@ na elke gok de hint "Hoger!" of "Lager!" totdat je het juiste getal vindt.
 
 ### Spelen
 
+Terminal-versie:
+
 ```bash
 python gokspel.py
 ```
+
+Browserversie (met confetti, ballonnen en geluid bij winst): open `index.html`
+in je browser, geen installatie nodig.
 
 ### Tests
 
